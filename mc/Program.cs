@@ -18,7 +18,7 @@ internal class Program
                 return;
             }
 
-            var parser = new Parser(text: line);
+            var parser = new Parser(line);
             var syntaxTree = parser.Parse();
 
             var color = Console.ForegroundColor;
@@ -28,7 +28,7 @@ internal class Program
 
             if (!syntaxTree.Diagnostics.Any())
             {
-                var e = new Evaluator(root: syntaxTree.Root);
+                var e = new Evaluator(syntaxTree.Root);
                 var result = e.Evaluate();
                 Console.WriteLine(result);
             }
@@ -147,7 +147,7 @@ internal class Lexer
     {
         if (_position >= _text.Length)
         {
-            return new SyntaxToken(kind: SyntaxKind.EndOfFileToken, position: _position, text: "\0", value: null);
+            return new SyntaxToken(SyntaxKind.EndOfFileToken, _position, "\0", null);
         }
 
         if (char.IsDigit(Current))
@@ -166,7 +166,7 @@ internal class Lexer
                 _diagnostics.Add($"The number {_text} isn't valid Int32.");
             }
 
-            return new SyntaxToken(kind: SyntaxKind.NumberToken, position: start, text: text, value: value);
+            return new SyntaxToken(SyntaxKind.NumberToken, start, text, value);
         }
 
         if (char.IsWhiteSpace(Current))
@@ -180,47 +180,47 @@ internal class Lexer
 
             var length = _position - start;
             var text = _text.Substring(start, length);
-            return new SyntaxToken(kind: SyntaxKind.WhitespaceToken, position: start, text: text, value: null);
+            return new SyntaxToken(SyntaxKind.WhitespaceToken, start, text, null);
         }
 
         if (Current == '+')
         {
-            return new SyntaxToken(kind: SyntaxKind.PlusToken, position: _position++, text: "+", value: null);
+            return new SyntaxToken(SyntaxKind.PlusToken, _position++, "+", null);
         }
 
         if (Current == '-')
         {
-            return new SyntaxToken(kind: SyntaxKind.MinusToken, position: _position++, text: "-", value: null);
+            return new SyntaxToken(SyntaxKind.MinusToken, _position++, "-", null);
         }
 
         if (Current == '*')
         {
-            return new SyntaxToken(kind: SyntaxKind.StarToken, position: _position++, text: "*", value: null);
+            return new SyntaxToken(SyntaxKind.StarToken, _position++, "*", null);
         }
 
         if (Current == '/')
         {
-            return new SyntaxToken(kind: SyntaxKind.SlashToken, position: _position++, text: "/", value: null);
+            return new SyntaxToken(SyntaxKind.SlashToken, _position++, "/", null);
         }
 
         if (Current == '(')
         {
-            return new SyntaxToken(kind: SyntaxKind.OpenParenthesisToken, position: _position++, text: "(",
-                value: null);
+            return new SyntaxToken(SyntaxKind.OpenParenthesisToken, _position++, "(",
+                null);
         }
 
         if (Current == ')')
         {
-            return new SyntaxToken(kind: SyntaxKind.CloseParenthesisToken, position: _position++, text: ")",
-                value: null);
+            return new SyntaxToken(SyntaxKind.CloseParenthesisToken, _position++, ")",
+                null);
         }
 
         _diagnostics.Add($"ERROR: bad character in input: '{Current}'");
         return new SyntaxToken(
-            kind: SyntaxKind.BadToken,
-            position: _position++,
-            text: _text.Substring(_position - 1, 1),
-            value: null);
+            SyntaxKind.BadToken,
+            _position++,
+            _text.Substring(_position - 1, 1),
+            null);
     }
 }
 
@@ -321,7 +321,7 @@ internal class Parser
     {
         var tokens = new List<SyntaxToken>();
 
-        var lexer = new Lexer(text: text);
+        var lexer = new Lexer(text);
         SyntaxToken token;
 
         do
@@ -369,7 +369,7 @@ internal class Parser
         }
 
         _diagnostics.Add($"ERROR: Unexpected token <{Current.Kind}>, expected <{kind}>");
-        return new SyntaxToken(kind: kind, position: Current.Position, text: null, value: null);
+        return new SyntaxToken(kind, Current.Position, null, null);
     }
 
     private ExpressionSyntax ParseExpression()
@@ -382,7 +382,7 @@ internal class Parser
         var expression = ParseExpression();
         var endOfFileToken = Match(SyntaxKind.EndOfFileToken);
 
-        return new SyntaxTree(diagnostics: _diagnostics, root: expression, endOfFileToken: endOfFileToken);
+        return new SyntaxTree(_diagnostics, expression, endOfFileToken);
     }
 
     private ExpressionSyntax ParseTerm()
@@ -394,7 +394,7 @@ internal class Parser
         {
             var operatorToken = NextToken();
             var right = ParseFactor();
-            left = new BinaryExpressionSyntax(left: left, operatorToken: operatorToken, right: right);
+            left = new BinaryExpressionSyntax(left, operatorToken, right);
         }
 
         return left;
@@ -409,7 +409,7 @@ internal class Parser
         {
             var operatorToken = NextToken();
             var right = ParsePrimaryExpression();
-            left = new BinaryExpressionSyntax(left: left, operatorToken: operatorToken, right: right);
+            left = new BinaryExpressionSyntax(left, operatorToken, right);
         }
 
         return left;
@@ -424,13 +424,13 @@ internal class Parser
             var expression = ParseExpression();
             var right = Match(SyntaxKind.CloseParenthesisToken);
             return new ParenthesizedExpressionSyntax(
-                openParenthesisToken: left,
-                expression: expression,
-                closeParenthesisToken: right);
+                left,
+                expression,
+                right);
         }
 
         var numberToken = Match(SyntaxKind.NumberToken);
-        return new NumberExpressionSyntax(numberToken: numberToken);
+        return new NumberExpressionSyntax(numberToken);
     }
 }
 

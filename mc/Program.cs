@@ -361,7 +361,9 @@ internal class Parser
         var left = ParsePrimaryExpression();
 
         while (Current.Kind == SyntaxKind.PlusToken ||
-               Current.Kind == SyntaxKind.MinusToken)
+               Current.Kind == SyntaxKind.MinusToken ||
+               Current.Kind == SyntaxKind.StarToken ||
+               Current.Kind == SyntaxKind.SlashToken)
         {
             var operatorToken = NextToken();
             var right = ParsePrimaryExpression();

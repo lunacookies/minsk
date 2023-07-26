@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace mc;
 
@@ -15,29 +17,39 @@ internal class Program
                 return;
             }
 
-            var lexer = new Lexer(line);
-            while (true)
-            {
-                var token = lexer.NextToken();
+            var parser = new Parser(text: line);
+            var expression = parser.Parse();
 
-                if (token.Kind == SyntaxKind.EndOfFileToken)
-                {
-                    break;
-                }
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Gray;
+            PrettyPrint(expression);
+            Console.ForegroundColor = color;
+        }
+    }
 
-                Console.Write($"{token.Kind}: '{token.Text}'");
-                if (token.Value != null)
-                {
-                    Console.Write($" {token.Value}");
-                }
+    private static void PrettyPrint(SyntaxNode node, string indent = "")
+    {
+        Console.Write(indent);
+        Console.Write(node.Kind);
 
-                Console.WriteLine();
-            }
+        if (node is SyntaxToken t && t.Value != null)
+        {
+            Console.Write(" ");
+            Console.Write(t.Value);
+        }
+
+        Console.WriteLine();
+
+        indent += "    ";
+
+        foreach (var child in node.GetChildren())
+        {
+            PrettyPrint(child, indent);
         }
     }
 }
 
-enum SyntaxKind
+internal enum SyntaxKind
 {
     NumberToken,
     WhitespaceToken,
@@ -48,26 +60,33 @@ enum SyntaxKind
     OpenParenthesisToken,
     CloseParenthesisToken,
     BadToken,
-    EndOfFileToken
+    EndOfFileToken,
+    NumberExpression,
+    BinaryExpression
 }
 
-class SyntaxToken
+internal class SyntaxToken : SyntaxNode
 {
-    public SyntaxKind Kind { get; }
-    public int Position { get; }
-    public string Text { get; }
-    public object? Value { get; }
-
-    public SyntaxToken(SyntaxKind kind, int position, string text, object? value)
+    public SyntaxToken(SyntaxKind kind, int position, string? text, object? value)
     {
         Kind = kind;
         Position = position;
         Text = text;
         Value = value;
     }
+
+    public override SyntaxKind Kind { get; }
+    public int Position { get; }
+    public string? Text { get; }
+    public object? Value { get; }
+
+    public override IEnumerable<SyntaxNode> GetChildren()
+    {
+        return Enumerable.Empty<SyntaxNode>();
+    }
 }
 
-class Lexer
+internal class Lexer
 {
     private readonly string _text;
     private int _position;
@@ -168,5 +187,132 @@ class Lexer
             position: _position++,
             text: _text.Substring(_position - 1, 1),
             value: null);
+    }
+}
+
+internal abstract class SyntaxNode
+{
+    public abstract SyntaxKind Kind { get; }
+
+    public abstract IEnumerable<SyntaxNode> GetChildren();
+}
+
+internal abstract class ExpressionSyntax : SyntaxNode
+{
+}
+
+internal sealed class NumberExpressionSyntax : ExpressionSyntax
+{
+    public NumberExpressionSyntax(SyntaxToken numberToken)
+    {
+        NumberToken = numberToken;
+    }
+
+    public override SyntaxKind Kind => SyntaxKind.NumberExpression;
+    public SyntaxToken NumberToken { get; }
+
+    public override IEnumerable<SyntaxNode> GetChildren()
+    {
+        yield return NumberToken;
+    }
+}
+
+internal sealed class BinaryExpressionSyntax : ExpressionSyntax
+{
+    public BinaryExpressionSyntax(ExpressionSyntax left, SyntaxToken operatorToken, ExpressionSyntax right)
+    {
+        Left = left;
+        OperatorToken = operatorToken;
+        Right = right;
+    }
+
+    public override SyntaxKind Kind => SyntaxKind.BinaryExpression;
+    public ExpressionSyntax Left { get; }
+    public SyntaxToken OperatorToken { get; }
+    public ExpressionSyntax Right { get; }
+
+    public override IEnumerable<SyntaxNode> GetChildren()
+    {
+        yield return Left;
+        yield return OperatorToken;
+        yield return Right;
+    }
+}
+
+internal class Parser
+{
+    private readonly SyntaxToken[] _tokens;
+    private int _position;
+
+    public Parser(string text)
+    {
+        var tokens = new List<SyntaxToken>();
+
+        var lexer = new Lexer(text: text);
+        SyntaxToken token;
+
+        do
+        {
+            token = lexer.NextToken();
+
+            if (token.Kind != SyntaxKind.WhitespaceToken &&
+                token.Kind != SyntaxKind.BadToken)
+            {
+                tokens.Add(token);
+            }
+        } while (token.Kind != SyntaxKind.EndOfFileToken);
+
+        _tokens = tokens.ToArray();
+    }
+
+    private SyntaxToken Peek(int offset)
+    {
+        var index = _position + offset;
+        if (index >= _tokens.Length)
+        {
+            return _tokens[^1];
+        }
+
+        return _tokens[index];
+    }
+
+    private SyntaxToken Current => Peek(0);
+
+    private SyntaxToken NextToken()
+    {
+        var current = Current;
+        _position++;
+        return current;
+    }
+
+    private SyntaxToken Match(SyntaxKind kind)
+    {
+        if (Current.Kind == kind)
+        {
+            return NextToken();
+        }
+
+        return new SyntaxToken(kind: kind, position: Current.Position, text: null, value: null);
+    }
+
+    public ExpressionSyntax Parse()
+    {
+        var left = ParsePrimaryExpression();
+
+        while (Current.Kind == SyntaxKind.PlusToken ||
+               Current.Kind == SyntaxKind.MinusToken)
+        {
+            var operatorToken = NextToken();
+            var right = ParsePrimaryExpression();
+            left = new BinaryExpressionSyntax(left: left, operatorToken: operatorToken, right: right);
+        }
+
+        return left;
+    }
+
+    private ExpressionSyntax ParsePrimaryExpression()
+    {
+        var numberToken = Match(SyntaxKind.NumberToken);
+        return new NumberExpressionSyntax(numberToken: numberToken);
     }
 }

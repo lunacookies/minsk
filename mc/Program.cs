@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace mc;
@@ -25,7 +26,13 @@ internal class Program
             PrettyPrint(syntaxTree.Root);
             Console.ForegroundColor = color;
 
-            if (syntaxTree.Diagnostics.Any())
+            if (!syntaxTree.Diagnostics.Any())
+            {
+                var e = new Evaluator(root: syntaxTree.Root);
+                var result = e.Evaluate();
+                Console.WriteLine(result);
+            }
+            else
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
 
@@ -153,7 +160,11 @@ internal class Lexer
 
             var length = _position - start;
             var text = _text.Substring(start, length);
-            int.TryParse(text, out var value);
+            if (!int.TryParse(text, out var value))
+            {
+                _diagnostics.Add($"The number {_text} isn't valid Int32.");
+            }
+
             return new SyntaxToken(kind: SyntaxKind.NumberToken, position: start, text: text, value: value);
         }
 
@@ -364,5 +375,58 @@ internal class Parser
     {
         var numberToken = Match(SyntaxKind.NumberToken);
         return new NumberExpressionSyntax(numberToken: numberToken);
+    }
+}
+
+internal class Evaluator
+{
+    private readonly ExpressionSyntax _root;
+
+    public Evaluator(ExpressionSyntax root)
+    {
+        _root = root;
+    }
+
+    public int Evaluate()
+    {
+        return EvaluateExpression(_root);
+    }
+
+    private int EvaluateExpression(ExpressionSyntax node)
+    {
+        if (node is NumberExpressionSyntax n)
+        {
+            return (int)(n.NumberToken.Value ?? throw new UnreachableException());
+        }
+
+        if (node is BinaryExpressionSyntax b)
+        {
+            var left = EvaluateExpression(b.Left);
+            var right = EvaluateExpression(b.Right);
+
+            if (b.OperatorToken.Kind == SyntaxKind.PlusToken)
+            {
+                return left + right;
+            }
+
+            if (b.OperatorToken.Kind == SyntaxKind.MinusToken)
+            {
+                return left - right;
+            }
+
+            if (b.OperatorToken.Kind == SyntaxKind.StarToken)
+            {
+                return left * right;
+            }
+
+            if (b.OperatorToken.Kind == SyntaxKind.SlashToken)
+            {
+                return left / right;
+            }
+
+            throw new Exception($"Unexpected binary operator {b.OperatorToken.Kind}");
+        }
+
+        throw new Exception($"Unexpected node {node.Kind}");
     }
 }

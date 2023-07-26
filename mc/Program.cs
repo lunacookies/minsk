@@ -9,6 +9,8 @@ internal class Program
 {
     public static void Main(string[] args)
     {
+        var showTree = false;
+
         while (true)
         {
             Console.Write("> ");
@@ -18,12 +20,28 @@ internal class Program
                 return;
             }
 
+            if (line == "#showTree")
+            {
+                showTree = !showTree;
+                Console.WriteLine(showTree ? "Showing parse trees." : "Not showing parse trees");
+                continue;
+            }
+
+            if (line == "#cls")
+            {
+                Console.Clear();
+                continue;
+            }
+
             var syntaxTree = SyntaxTree.Parse(line);
 
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Gray;
-            PrettyPrint(syntaxTree.Root);
-            Console.ForegroundColor = color;
+            if (showTree)
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Gray;
+                PrettyPrint(syntaxTree.Root);
+                Console.ForegroundColor = color;
+            }
 
             if (!syntaxTree.Diagnostics.Any())
             {
@@ -33,6 +51,7 @@ internal class Program
             }
             else
             {
+                var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.DarkRed;
 
                 foreach (var diagnostic in syntaxTree.Diagnostics)

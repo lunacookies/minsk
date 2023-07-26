@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Minsk.CodeAnalysis\Minsk.CodeAnalysis.csproj" />
+  </ItemGroup>
+
 </Project>

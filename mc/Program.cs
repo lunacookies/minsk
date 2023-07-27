@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Minsk.CodeAnalysis;
+using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Syntax;
 
 namespace mc;
@@ -34,6 +35,10 @@ internal static class Program
             }
 
             var syntaxTree = SyntaxTree.Parse(line);
+            var binder = new Binder();
+            var boundExpression = binder.BindExpression(syntaxTree.Root);
+
+            var diagnostics = syntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
 
             if (showTree)
             {
@@ -42,9 +47,9 @@ internal static class Program
                 Console.ResetColor();
             }
 
-            if (!syntaxTree.Diagnostics.Any())
+            if (!diagnostics.Any())
             {
-                var e = new Evaluator(syntaxTree.Root);
+                var e = new Evaluator(boundExpression);
                 var result = e.Evaluate();
                 Console.WriteLine(result);
             }
@@ -52,7 +57,7 @@ internal static class Program
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
 
-                foreach (var diagnostic in syntaxTree.Diagnostics)
+                foreach (var diagnostic in diagnostics)
                 {
                     Console.WriteLine(diagnostic);
                 }
@@ -65,7 +70,6 @@ internal static class Program
     private static void PrettyPrint(SyntaxNode node, string indent = "", bool isLast = true)
     {
         var marker = isLast ? "└──" : "├──";
-
 
         Console.Write(indent);
         Console.Write(marker);

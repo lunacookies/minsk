@@ -19,9 +19,9 @@ public sealed class Evaluator
 
     private int EvaluateExpression(ExpressionSyntax node)
     {
-        if (node is NumberExpressionSyntax n)
+        if (node is LiteralExpressionSyntax n)
         {
-            return (int)(n.NumberToken.Value ?? throw new UnreachableException());
+            return (int)(n.LiteralToken.Value ?? throw new UnreachableException());
         }
 
         if (node is BinaryExpressionSyntax b)

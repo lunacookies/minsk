@@ -33,7 +33,7 @@ internal sealed class Lexer
         _position++;
     }
 
-    public SyntaxToken NextToken()
+    public SyntaxToken Lex()
     {
         if (_position >= _text.Length)
         {

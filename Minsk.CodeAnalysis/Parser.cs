@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Minsk.CodeAnalysis;
 
-internal class Parser
+internal sealed class Parser
 {
     private readonly SyntaxToken[] _tokens;
 

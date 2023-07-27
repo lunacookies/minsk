@@ -27,7 +27,7 @@ public sealed class Evaluator
 
         if (node is BoundUnaryExpression u)
         {
-            var operand = EvaluateExpression(u.Operand);
+            object operand = EvaluateExpression(u.Operand);
 
             switch (u.Op.Kind)
             {
@@ -44,8 +44,8 @@ public sealed class Evaluator
 
         if (node is BoundBinaryExpression b)
         {
-            var left = EvaluateExpression(b.Left);
-            var right = EvaluateExpression(b.Right);
+            object left = EvaluateExpression(b.Left);
+            object right = EvaluateExpression(b.Right);
 
             switch (b.Op.Kind)
             {

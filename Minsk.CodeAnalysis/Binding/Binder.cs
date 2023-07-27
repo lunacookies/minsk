@@ -6,7 +6,7 @@ namespace Minsk.CodeAnalysis.Binding;
 
 public sealed class Binder
 {
-    private readonly List<string> _diagnostics = new();
+    private readonly List<string> _diagnostics = new List<string>();
 
     public IEnumerable<string> Diagnostics => _diagnostics;
 
@@ -27,14 +27,14 @@ public sealed class Binder
 
     private BoundExpression BindLiteralExpression(LiteralExpressionSyntax syntax)
     {
-        var value = syntax.Value ?? 0;
+        object value = syntax.Value ?? 0;
         return new BoundLiteralExpression(value);
     }
 
     private BoundExpression BindUnaryExpression(UnaryExpressionSyntax syntax)
     {
-        var boundOperand = BindExpression(syntax.Operand);
-        var boundOperator = BoundUnaryOperator.Bind(syntax.OperatorToken.Kind, boundOperand.Type);
+        BoundExpression boundOperand = BindExpression(syntax.Operand);
+        BoundUnaryOperator? boundOperator = BoundUnaryOperator.Bind(syntax.OperatorToken.Kind, boundOperand.Type);
 
         if (boundOperator == null)
         {
@@ -48,9 +48,10 @@ public sealed class Binder
 
     private BoundExpression BindBinaryExpression(BinaryExpressionSyntax syntax)
     {
-        var boundLeft = BindExpression(syntax.Left);
-        var boundRight = BindExpression(syntax.Right);
-        var boundOperator = BoundBinaryOperator.Bind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type);
+        BoundExpression boundLeft = BindExpression(syntax.Left);
+        BoundExpression boundRight = BindExpression(syntax.Right);
+        BoundBinaryOperator? boundOperator =
+            BoundBinaryOperator.Bind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type);
 
         if (boundOperator == null)
         {

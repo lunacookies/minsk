@@ -5,6 +5,18 @@ namespace Minsk.CodeAnalysis.Binding;
 
 public sealed class BoundUnaryOperator
 {
+    public SyntaxKind SyntaxKind { get; }
+    public BoundUnaryOperatorKind Kind { get; }
+    public Type OperandType { get; }
+    public Type ResultType { get; }
+
+    private static readonly BoundUnaryOperator[] Operators =
+    {
+        new BoundUnaryOperator(SyntaxKind.BangToken, BoundUnaryOperatorKind.LogicalNegation, typeof(bool)),
+        new BoundUnaryOperator(SyntaxKind.PlusToken, BoundUnaryOperatorKind.Identity, typeof(int)),
+        new BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, typeof(int))
+    };
+
     private BoundUnaryOperator(SyntaxKind syntaxKind, BoundUnaryOperatorKind kind, Type operandType)
         : this(syntaxKind, kind, operandType, operandType)
     {
@@ -18,21 +30,9 @@ public sealed class BoundUnaryOperator
         ResultType = resultType;
     }
 
-    public SyntaxKind SyntaxKind { get; }
-    public BoundUnaryOperatorKind Kind { get; }
-    public Type OperandType { get; }
-    public Type ResultType { get; }
-
-    private static readonly BoundUnaryOperator[] Operators =
-    {
-        new BoundUnaryOperator(SyntaxKind.BangToken, BoundUnaryOperatorKind.LogicalNegation, typeof(bool)),
-        new BoundUnaryOperator(SyntaxKind.PlusToken, BoundUnaryOperatorKind.Identity, typeof(int)),
-        new BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, typeof(int))
-    };
-
     public static BoundUnaryOperator? Bind(SyntaxKind syntaxKind, Type operandType)
     {
-        foreach (var op in Operators)
+        foreach (BoundUnaryOperator op in Operators)
         {
             if (op.SyntaxKind == syntaxKind && op.OperandType == operandType)
             {

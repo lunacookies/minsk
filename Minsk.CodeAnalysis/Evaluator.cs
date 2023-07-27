@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using Minsk.CodeAnalysis.Binding;
-using Minsk.CodeAnalysis.Syntax;
 
 namespace Minsk.CodeAnalysis;
 
@@ -30,7 +29,7 @@ public sealed class Evaluator
         {
             var operand = EvaluateExpression(u.Operand);
 
-            switch (u.OperatorKind)
+            switch (u.Op.Kind)
             {
                 case BoundUnaryOperatorKind.Identity:
                     return (int)operand;
@@ -39,7 +38,7 @@ public sealed class Evaluator
                 case BoundUnaryOperatorKind.LogicalNegation:
                     return !(bool)operand;
                 default:
-                    throw new Exception($"Unexpected unary operator {u.OperatorKind}");
+                    throw new Exception($"Unexpected unary operator {u.Op}");
             }
         }
 
@@ -48,7 +47,7 @@ public sealed class Evaluator
             var left = EvaluateExpression(b.Left);
             var right = EvaluateExpression(b.Right);
 
-            switch (b.OperatorKind)
+            switch (b.Op.Kind)
             {
                 case BoundBinaryOperatorKind.Addition:
                     return (int)left + (int)right;
@@ -63,7 +62,7 @@ public sealed class Evaluator
                 case BoundBinaryOperatorKind.LogicalOr:
                     return (bool)left || (bool)right;
                 default:
-                    throw new Exception($"Unexpected binary operator {b.OperatorKind}");
+                    throw new Exception($"Unexpected binary operator {b.Op}");
             }
         }
 

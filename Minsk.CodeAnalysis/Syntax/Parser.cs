@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Minsk.CodeAnalysis.Syntax;
@@ -7,7 +6,7 @@ internal sealed class Parser
 {
     private readonly SyntaxToken[] _tokens;
 
-    private List<string> _diagnostics = new List<string>();
+    private readonly List<string> _diagnostics = new();
     private int _position;
 
     public Parser(string text)
@@ -34,6 +33,8 @@ internal sealed class Parser
 
     public IEnumerable<string> Diagnostics => _diagnostics;
 
+    private SyntaxToken Current => Peek(0);
+
     private SyntaxToken Peek(int offset)
     {
         var index = _position + offset;
@@ -44,8 +45,6 @@ internal sealed class Parser
 
         return _tokens[index];
     }
-
-    private SyntaxToken Current => Peek(0);
 
     private SyntaxToken NextToken()
     {

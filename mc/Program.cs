@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Minsk.CodeAnalysis;
+using Minsk.CodeAnalysis.Syntax;
 
 namespace mc;
 

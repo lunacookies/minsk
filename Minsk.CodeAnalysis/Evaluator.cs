@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Minsk.CodeAnalysis.Syntax;
 
 namespace Minsk.CodeAnalysis;
 

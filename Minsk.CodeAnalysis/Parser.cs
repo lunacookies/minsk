@@ -53,7 +53,7 @@ internal sealed class Parser
         return current;
     }
 
-    private SyntaxToken Match(SyntaxKind kind)
+    private SyntaxToken MatchToken(SyntaxKind kind)
     {
         if (Current.Kind == kind)
         {
@@ -64,17 +64,17 @@ internal sealed class Parser
         return new SyntaxToken(kind, Current.Position, null, null);
     }
 
-    private ExpressionSyntax ParseExpression()
-    {
-        return ParseTerm();
-    }
-
     public SyntaxTree Parse()
     {
         var expression = ParseExpression();
-        var endOfFileToken = Match(SyntaxKind.EndOfFileToken);
+        var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
 
         return new SyntaxTree(_diagnostics, expression, endOfFileToken);
+    }
+
+    private ExpressionSyntax ParseExpression()
+    {
+        return ParseTerm();
     }
 
     private ExpressionSyntax ParseTerm()
@@ -114,14 +114,14 @@ internal sealed class Parser
         {
             var left = NextToken();
             var expression = ParseExpression();
-            var right = Match(SyntaxKind.CloseParenthesisToken);
+            var right = MatchToken(SyntaxKind.CloseParenthesisToken);
             return new ParenthesizedExpressionSyntax(
                 left,
                 expression,
                 right);
         }
 
-        var numberToken = Match(SyntaxKind.NumberToken);
+        var numberToken = MatchToken(SyntaxKind.NumberToken);
         return new NumberExpressionSyntax(numberToken);
     }
 }

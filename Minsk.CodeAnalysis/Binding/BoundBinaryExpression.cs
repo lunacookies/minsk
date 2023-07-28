@@ -16,5 +16,5 @@ public sealed class BoundBinaryExpression : BoundExpression
     }
 
     public override BoundNodeKind Kind => BoundNodeKind.UnaryExpression;
-    public override Type Type => Left.Type;
+    public override Type Type => Op.Type;
 }

@@ -107,9 +107,6 @@ internal sealed class Lexer
                 return new SyntaxToken(SyntaxKind.CloseParenthesisToken, _position++, ")",
                     null);
 
-            case '!':
-                return new SyntaxToken(SyntaxKind.BangToken, _position++, "!", null);
-
             case '&':
                 if (Lookahead == '&')
                 {
@@ -125,6 +122,22 @@ internal sealed class Lexer
                 }
 
                 break;
+
+            case '=':
+                if (Lookahead == '=')
+                {
+                    return new SyntaxToken(SyntaxKind.EqualsEqualsToken, _position += 2, "==", null);
+                }
+
+                break;
+
+            case '!':
+                if (Lookahead == '=')
+                {
+                    return new SyntaxToken(SyntaxKind.BangEqualsToken, _position += 2, "!=", null);
+                }
+
+                return new SyntaxToken(SyntaxKind.BangToken, _position++, "!", null);
         }
 
         _diagnostics.Add($"ERROR: bad character in input: '{Current}'");

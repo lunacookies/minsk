@@ -8,7 +8,7 @@ public sealed class BoundUnaryOperator
     public SyntaxKind SyntaxKind { get; }
     public BoundUnaryOperatorKind Kind { get; }
     public Type OperandType { get; }
-    public Type ResultType { get; }
+    public Type Type { get; }
 
     private static readonly BoundUnaryOperator[] Operators =
     {
@@ -27,7 +27,7 @@ public sealed class BoundUnaryOperator
         SyntaxKind = syntaxKind;
         Kind = kind;
         OperandType = operandType;
-        ResultType = resultType;
+        Type = resultType;
     }
 
     public static BoundUnaryOperator? Bind(SyntaxKind syntaxKind, Type operandType)

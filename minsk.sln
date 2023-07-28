@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mc", "mc\mc.csproj", "{D626DDB0-C6EE-4965-86D4-F1ABCAD3584C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minsk.CodeAnalysis", "Minsk.CodeAnalysis\Minsk.CodeAnalysis.csproj", "{5233B64C-15B7-4B60-87FA-4AA776DC7A4E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minsk", "Minsk\Minsk.csproj", "{5233B64C-15B7-4B60-87FA-4AA776DC7A4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

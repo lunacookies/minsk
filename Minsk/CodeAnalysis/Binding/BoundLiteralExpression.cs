@@ -1,8 +1,6 @@
-using System;
-
 namespace Minsk.CodeAnalysis.Binding;
 
-public sealed class BoundLiteralExpression : BoundExpression
+internal sealed class BoundLiteralExpression : BoundExpression
 {
     public object Value { get; }
 

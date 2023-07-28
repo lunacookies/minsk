@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis;
-using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Syntax;
 
 namespace mc;
@@ -35,10 +35,10 @@ internal static class Program
             }
 
             SyntaxTree syntaxTree = SyntaxTree.Parse(line);
-            Binder binder = new Binder();
-            BoundExpression boundExpression = binder.BindExpression(syntaxTree.Root);
+            Compilation compilation = new Compilation(syntaxTree);
+            EvaluationResult result = compilation.Evaluate();
 
-            string[] diagnostics = syntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
+            IReadOnlyList<string> diagnostics = result.Diagnostics;
 
             if (showTree)
             {
@@ -49,9 +49,7 @@ internal static class Program
 
             if (!diagnostics.Any())
             {
-                Evaluator e = new Evaluator(boundExpression);
-                object result = e.Evaluate();
-                Console.WriteLine(result);
+                Console.WriteLine(result.Value);
             }
             else
             {

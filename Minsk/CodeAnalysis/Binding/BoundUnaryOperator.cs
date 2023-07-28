@@ -1,9 +1,8 @@
-using System;
 using Minsk.CodeAnalysis.Syntax;
 
 namespace Minsk.CodeAnalysis.Binding;
 
-public sealed class BoundUnaryOperator
+internal sealed class BoundUnaryOperator
 {
     public SyntaxKind SyntaxKind { get; }
     public BoundUnaryOperatorKind Kind { get; }

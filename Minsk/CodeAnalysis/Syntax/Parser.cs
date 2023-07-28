@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Minsk.CodeAnalysis.Syntax;
 
 internal sealed class Parser

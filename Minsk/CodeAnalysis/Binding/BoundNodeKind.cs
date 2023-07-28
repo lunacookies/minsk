@@ -1,6 +1,6 @@
 namespace Minsk.CodeAnalysis.Binding;
 
-public enum BoundNodeKind
+internal enum BoundNodeKind
 {
     LiteralExpression,
     UnaryExpression,

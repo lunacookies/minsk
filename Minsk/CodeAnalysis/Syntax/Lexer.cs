@@ -3,15 +3,13 @@ namespace Minsk.CodeAnalysis.Syntax;
 internal sealed class Lexer
 {
     private readonly string _text;
-    private readonly List<string> _diagnostics = new List<string>();
     private int _position;
+    public DiagnosticBag Diagnostics { get; } = new DiagnosticBag();
 
     public Lexer(string text)
     {
         _text = text;
     }
-
-    public IEnumerable<string> Diagnostics => _diagnostics;
 
     private char Current => Peek(0);
     private char Lookahead => Peek(1);
@@ -53,7 +51,7 @@ internal sealed class Lexer
             string text = _text.Substring(start, length);
             if (!int.TryParse(text, out int value))
             {
-                _diagnostics.Add($"The number {_text} isn't valid Int32.");
+                Diagnostics.ReportInvalidNumber(new TextSpan(start, length), _text, typeof(int));
             }
 
             return new SyntaxToken(SyntaxKind.NumberToken, start, text, value);
@@ -138,7 +136,7 @@ internal sealed class Lexer
                 return new SyntaxToken(SyntaxKind.BangToken, _position++, "!", null);
         }
 
-        _diagnostics.Add($"ERROR: bad character in input: '{Current}'");
+        Diagnostics.ReportBadCharacter(_position, Current);
         return new SyntaxToken(SyntaxKind.BadToken, _position++, _text.Substring(_position - 1, 1), null);
     }
 }

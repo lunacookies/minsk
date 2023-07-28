@@ -4,9 +4,7 @@ namespace Minsk.CodeAnalysis.Binding;
 
 internal sealed class Binder
 {
-    private readonly List<string> _diagnostics = new List<string>();
-
-    public IEnumerable<string> Diagnostics => _diagnostics;
+    public DiagnosticBag Diagnostics { get; } = new DiagnosticBag();
 
     public BoundExpression BindExpression(ExpressionSyntax syntax)
     {
@@ -38,8 +36,8 @@ internal sealed class Binder
 
         if (boundOperator == null)
         {
-            _diagnostics.Add(
-                $"Unary operator '{syntax.OperatorToken.Text}' is not defined for type {boundOperand.Type}.");
+            Diagnostics.ReportUndefinedUnaryOperator(syntax.OperatorToken.Span, syntax.OperatorToken.Text,
+                boundOperand.Type);
             return boundOperand;
         }
 
@@ -55,8 +53,8 @@ internal sealed class Binder
 
         if (boundOperator == null)
         {
-            _diagnostics.Add(
-                $"Binary operator '{syntax.OperatorToken.Text}' is not defined for types {boundLeft.Type} and {boundRight.Type}.");
+            Diagnostics.ReportUndefinedBinaryOperator(syntax.OperatorToken.Span, syntax.OperatorToken.Text,
+                boundLeft.Type, boundRight.Type);
             return boundLeft;
         }
 
